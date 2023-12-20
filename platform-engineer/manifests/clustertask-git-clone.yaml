@@ -23,7 +23,7 @@ spec:
         git clone $(params.gitRepo) $(params.gitRepoDestination)
   stepTemplate:
     securityContext:
-      fsGroup: 0
+      runAsGroup: 0
   workspaces:
     - name: workspace
       mountPath: /workspace
