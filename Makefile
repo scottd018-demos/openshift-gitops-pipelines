@@ -49,14 +49,20 @@ platform:
 
 # cleanup tasks
 gitops-cleanup:
-	oc -n openshift-gitops-operator delete subscription openshift-gitops-operator
-	oc -n openshift-gitops delete argocd openshift-gitops
-	oc delete gitopsservice cluster
-	oc -n openshift-gitops-operator delete csv openshift-gitops-operator.v1.11.0
-	oc delete namespace openshift-gitops
+	oc -n openshift-gitops-operator delete subscription openshift-gitops-operator; \
+	oc -n openshift-gitops delete argocd openshift-gitops; \
+	oc delete gitopsservice cluster; \
+	oc -n openshift-gitops-operator delete csv openshift-gitops-operator.v1.11.0; \
+	for CRD in $$(oc get crd | grep argo | awk '{print $$1}'); do oc delete crd $$CRD; done
 
 platform-cleanup:
-	oc delete -f platform-engineer/platform.yaml
+	oc delete -f platform-engineer/platform.yaml; \
+	oc delete tektonconfig config; \
+	sleep 30; \
+	oc delete csv -n openshift-operators openshift-pipelines-operator-rh.v1.13.1; \
+	for CRD in $$(oc get crd | grep tekton | awk '{print $$1}'); do oc delete crd $$CRD; done; \
+	oc delete csv -n openshift-serverless serverless-operator.v1.31.0; \
+	for CRD in $$(oc get crd | grep knative | awk '{print $$1}'); do oc delete crd $$CRD; done
 
 #
 # developer tasks
