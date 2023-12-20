@@ -17,7 +17,7 @@ spec:
         #!/usr/bin/env bash
         set -e
         cd $(params.goTestDirectory)
-        go test
+        go test -tags=unit
   workspaces:
     - name: workspace
       mountPath: /workspace
