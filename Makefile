@@ -57,6 +57,8 @@ gitops-cleanup:
 
 platform-cleanup:
 	oc delete -f platform-engineer/platform.yaml; \
+	oc delete oc delete mutatingwebhookconfiguration webhook.operator.tekton.dev; \
+	oc delete validatingwebhookconfiguration validation.webhook.operator.tekton.dev namespace.operator.tekton.dev config.webhook.operator.tekton.dev; \
 	oc delete tektonconfig config; \
 	sleep 30; \
 	oc delete csv -n openshift-operators openshift-pipelines-operator-rh.v1.13.1; \
