@@ -37,6 +37,28 @@ infra-destroy:
 	terraform apply -destroy -var="db_subnet_ids=$$ROSA_PRIVATE_SUBNET_IDS"
 
 #
+# platform engineer tasks
+#
+
+# deploy tasks
+gitops:
+	oc apply -f platform-engineer/gitops.yaml
+
+platform:
+	oc apply -f platform-engineer/platform.yaml
+
+# cleanup tasks
+gitops-cleanup:
+	oc -n openshift-gitops-operator delete subscription openshift-gitops-operator
+	oc -n openshift-gitops delete argocd openshift-gitops
+	oc delete gitopsservice cluster
+	oc -n openshift-gitops-operator delete csv openshift-gitops-operator.v1.11.0
+	oc delete namespace openshift-gitops
+
+platform-cleanup:
+	oc delete -f platform-engineer/platform.yaml
+
+#
 # developer tasks
 #
 
