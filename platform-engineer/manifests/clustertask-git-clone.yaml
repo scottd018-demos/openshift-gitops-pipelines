@@ -23,7 +23,7 @@ spec:
         git clone $(params.gitRepo) $(params.gitRepoDestination)
 
         # print tree to debug
-        find . $(params.gitRepoDestination) -type f
+        find $(params.gitRepoDestination) -type f
   stepTemplate:
     securityContext:
       runAsGroup: 0
