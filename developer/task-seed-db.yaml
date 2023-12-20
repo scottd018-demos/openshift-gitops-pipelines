@@ -1,0 +1,38 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: yelb-seed-db
+  namespace: yelb
+spec:
+  taskSpec:
+    steps:
+      - name: seed-db
+        image: registry.redhat.io/rhel9/postgresql-15:1-42
+        envFrom:
+          - secretRef:
+              name: yelb-connection-info
+        script: |
+          #!/usr/bin/env bash
+
+          set -e
+          
+          # check environment
+          : ${YELB_DB_SERVER_ENDPOINT?missing YELB_DB_SERVER_ENDPOINT environment variable}
+          : ${YELB_DB_SERVER_PORT?missing YELB_DB_SERVER_PORT environment variable}
+          : ${YELB_DB_NAME?missing YELB_DB_NAME environment variable}
+          : ${YELB_DB_USERNAME?missing YELB_DB_USERNAME environment variable}
+          : ${YELB_DB_PASSWORD?missing YELB_DB_PASSWORD environment variable}
+
+          # create the sql seed file
+          cat <<EOF > /tmp/yelb.sql
+          CREATE TABLE restaurants (name char(30),count integer,PRIMARY KEY (name));
+          INSERT INTO restaurants (name, count) VALUES ('ihop', 0);
+          INSERT INTO restaurants (name, count) VALUES ('chipotle', 0);
+          INSERT INTO restaurants (name, count) VALUES ('outback', 0);
+          INSERT INTO restaurants (name, count) VALUES ('bucadibeppo', 0);
+          EOF
+
+          # seed the database
+          export PGPASSWORD="${YELB_DB_PASSWORD}"
+          psql -h ${YELB_DB_SERVER_ENDPOINT} -p ${YELB_DB_SERVER_PORT} -U ${YELB_DB_USERNAME} -d ${YELB_DB_NAME} -a -f /tmp/yelb.sql

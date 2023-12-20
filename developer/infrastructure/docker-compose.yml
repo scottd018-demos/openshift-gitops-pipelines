@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:6
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    ports:
+      - "6379:6379"
+    networks:
+      - yelb
+
+  postgres:
+    image: postgres:15
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: yelb
+    ports:
+      - "5432:5432"
+    networks:
+      - yelb
+
+  setup:
+    image: postgres:15
+    depends_on:
+      - postgres
+    restart: "no"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    entrypoint:
+      - "bash"
+      - "-c"
+      - |
+          sleep 10
+          cat <<EOF > /tmp/yelb.sql
+          CREATE TABLE restaurants (name char(30),count integer,PRIMARY KEY (name));
+          INSERT INTO restaurants (name, count) VALUES ('ihop', 0);
+          INSERT INTO restaurants (name, count) VALUES ('chipotle', 0);
+          INSERT INTO restaurants (name, count) VALUES ('outback', 0);
+          INSERT INTO restaurants (name, count) VALUES ('bucadibeppo', 0);
+          EOF
+
+          export PGPASSWORD="postgres"
+          psql -h postgres -p 5432 -U postgres -d yelb -a -f /tmp/yelb.sql
+    networks:
+      - yelb
+
+networks:
+  yelb:
+    driver: overlay
+    attachable: true
