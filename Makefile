@@ -3,7 +3,7 @@
 #       the terraform deploy-infra target, but this allows us not to rely on it entirely.
 #
 ROSA_CLUSTER_NAME ?= poc-dscott
-ROSA_SUBNET_IDS ?= $(shell rosa describe cluster -c $(ROSA_CLUSTER_NAME) -o json | jq -r '.aws.subnet_ids | join(" ")')
+ROSA_SUBNETS ?= $(shell rosa describe cluster -c $(ROSA_CLUSTER_NAME) -o json | jq -r '.aws.subnet_ids | join(" ")')
 YELB_SECRET_NAME ?= yelb-connection-info
 YELB_APP_NAME ?= yelb-app
 YELB_UI_NAME ?= yelb-ui
@@ -22,7 +22,7 @@ AWS_REGION ?= $(shell rosa describe cluster -c $(ROSA_CLUSTER_NAME) -o json | jq
 # deploy tasks
 infra:
 	ROSA_PRIVATE_SUBNET_IDS=$$(aws ec2 describe-subnets \
-		--subnet-ids $(ROSA_SUBNET_IDS) \
+		--subnet-ids $(ROSA_SUBNETS) \
 		--query 'Subnets[?Tags[?Key==`Name` && contains(Value, `private`)]].SubnetId' | jq -r '.') && \
 	cd infrastructure/deploy && \
 	terraform init && \
@@ -31,7 +31,7 @@ infra:
 # cleanup tasks
 infra-destroy:
 	ROSA_PRIVATE_SUBNET_IDS=$$(aws ec2 describe-subnets \
-		--subnet-ids $(ROSA_SUBNET_IDS) \
+		--subnet-ids $(ROSA_SUBNETS) \
 		--query 'Subnets[?Tags[?Key==`Name` && contains(Value, `private`)]].SubnetId' | jq -r '.') && \
 	cd infrastructure/deploy && \
 	terraform apply -destroy -var="db_subnet_ids=$$ROSA_PRIVATE_SUBNET_IDS"
