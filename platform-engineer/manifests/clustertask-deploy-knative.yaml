@@ -15,14 +15,6 @@ spec:
         The folder which contains the knative function code and is used to 
         build the image.
   steps:
-    - name: build-knative-image
-      image: registry.access.redhat.com/ubi9/podman:9.1.0-12
-      script: |
-        #!/usr/bin/env bash
-        set -e
-        export PATH="${PATH}:/tools/bin"
-        cd $(params.knativeDirectory)
-        kn func build -v
     - name: deploy-knative
       image: registry.access.redhat.com/ubi9/podman:9.1.0-12
       script: |
@@ -30,7 +22,7 @@ spec:
         set -e
         export PATH="${PATH}:/tools/bin"
         cd $(params.knativeDirectory)
-        kn func deploy --build=false -v
+        kn func deploy -v
   stepTemplate:
     securityContext:
       runAsUser: 0
