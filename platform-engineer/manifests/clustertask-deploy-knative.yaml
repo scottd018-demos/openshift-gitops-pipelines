@@ -40,11 +40,9 @@ spec:
             ENV_STRING+=" --env $KEY='$VALUE'"
           done
 
-          echo $ENV_STRING
-          # kn func deploy $ENV_STRING --build=false -v
+          kn func deploy $ENV_STRING --build=false -v
         else
-          echo
-          # kn func deploy --build=false -v
+          kn func deploy --build=false -v
         fi
   stepTemplate:
     securityContext:
