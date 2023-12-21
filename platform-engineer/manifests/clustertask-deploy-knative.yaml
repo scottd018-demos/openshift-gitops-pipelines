@@ -37,7 +37,7 @@ spec:
             KEY=`echo $SECRET | awk -F'/' '{print $NF}'`
             VALUE=`cat $SECRET`
 
-            ENV_STRING+=" --env $KEY='$VALUE'"
+            ENV_STRING+=" --env $KEY=$VALUE"
           done
 
           kn func deploy $ENV_STRING --build=false -v
