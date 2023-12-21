@@ -24,12 +24,24 @@ spec:
     #
     # test
     #
-    - name: test-unit-go
+    - name: test-lint-go
       params:
         - name: goTestDirectory
           value: /workspace/code/yelb-appserver/go
       runAfter:
         - setup-git-clone
+      taskRef:
+        kind: ClusterTask
+        name: test-lint-go
+      workspaces:
+        - name: workspace
+          workspace: workspace
+    - name: test-unit-go
+      params:
+        - name: goTestDirectory
+          value: /workspace/code/yelb-appserver/go
+      runAfter:
+        - test-lint-go
       taskRef:
         kind: ClusterTask
         name: test-unit-go
