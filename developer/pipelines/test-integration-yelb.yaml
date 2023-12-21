@@ -1,0 +1,29 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: test-integration-yelb
+  namespace: default
+spec:
+  steps:
+    - name: test-integration-yelb
+      image: golang:1.21.5-bullseye
+      script: |
+        #!/usr/bin/env bash
+
+        # TODO: this is incomplete
+
+        sleep 15
+        echo "success"
+
+        # install and start postgres in the background and capture pid
+
+        # install and start redis in the background and capture pid
+
+        # run go integration tests
+
+        # stop redis and postgres
+
+  workspaces:
+    - name: workspace
+      mountPath: /workspace
