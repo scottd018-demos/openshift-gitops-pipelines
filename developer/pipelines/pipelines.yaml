@@ -63,14 +63,10 @@ spec:
         kind: ClusterTask
         name: deploy-knative
       workspaces:
-        - name: images
-          workspace: images
         - name: workspace
           workspace: workspace
         - name: tools
           workspace: tools
-        - name: secret
-          workspace: secret
   workspaces:
     - name: workspace
     - name: tools
