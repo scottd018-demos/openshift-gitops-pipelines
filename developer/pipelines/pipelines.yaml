@@ -74,5 +74,3 @@ spec:
   workspaces:
     - name: workspace
     - name: tools
-    - name: images
-    - name: secret
