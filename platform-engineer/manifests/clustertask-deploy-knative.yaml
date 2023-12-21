@@ -27,23 +27,7 @@ spec:
         set -e
         export PATH="${PATH}:/tools/bin"
         cd $(params.knativeDirectory)
-        
-        # if we have a secret, use it
-        if [ -d /secret ]; then
-          # set an env string which will be passed to the knative deploy command
-          ENV_STRING=""
-
-          for SECRET in `find /secret -type f`; do
-            KEY=`echo $SECRET | awk -F'/' '{print $NF}'`
-            VALUE=`cat $SECRET`
-
-            ENV_STRING+=" --env $KEY=$VALUE"
-          done
-
-          kn func deploy $ENV_STRING --build=false -v
-        else
-          kn func deploy --build=false -v
-        fi
+        kn func deploy --build=false -v
   stepTemplate:
     securityContext:
       runAsUser: 0
