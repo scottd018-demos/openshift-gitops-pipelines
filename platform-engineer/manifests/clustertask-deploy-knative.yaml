@@ -33,12 +33,7 @@ spec:
       runAsUser: 0
       privileged: true
   workspaces:
-    - name: images
-      mountPath: /var/lib/containers
     - name: workspace
       mountPath: /workspace
     - name: tools
       mountPath: /tools
-    - name: secret
-      mountPath: /secret
-      optional: true

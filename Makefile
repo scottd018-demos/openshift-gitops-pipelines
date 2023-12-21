@@ -107,8 +107,8 @@ ui-destroy-dev:
 	docker rm -f $$(docker ps | grep yelb | grep ui | awk '{print $$NF}')
 
 # deploy tasks
-seed:
-	oc apply -f developer/task-seed-db.yaml
+project:
+	oc new-project yelb
 
 secret:
 	oc create secret generic $(YELB_SECRET_NAME) \
@@ -120,6 +120,12 @@ secret:
 		--from-literal=YELB_DB_PASSWORD=$(YELB_DB_PASSWORD) \
 		--from-literal=REDIS_SERVER_ENDPOINT=$(REDIS_SERVER_ENDPOINT) \
 		--from-literal=AWS_REGION=$(AWS_REGION)
+
+seed:
+	oc apply -f developer/pipelines/task-seed-db.yaml
+
+pipelines:
+	oc apply -f developer/pipelines/pipelines.yaml
 
 app:
 	if [[ ! -d developer/yelb ]]; then git clone https://github.com/scottd018-demos/yelb.git developer/yelb; fi  && \

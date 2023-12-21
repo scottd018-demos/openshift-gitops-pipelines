@@ -1,0 +1,78 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: yelb-app
+  namespace: default
+spec:
+  tasks:
+    - name: setup-git-clone
+      params:
+        - name: gitRepo
+          value: 'https://github.com/scottd018-demos/yelb.git'
+        - name: gitRepoDestination
+          value: /workspace/code
+      taskRef:
+        kind: ClusterTask
+        name: setup-git-clone
+      workspaces:
+        - name: workspace
+          workspace: workspace
+    - name: test-unit-go
+      params:
+        - name: goTestDirectory
+          value: /workspace/code/yelb-appserver/go
+      runAfter:
+        - setup-git-clone
+        - setup-knative
+      taskRef:
+        kind: ClusterTask
+        name: test-unit-go
+      workspaces:
+        - name: workspace
+          workspace: workspace
+    - name: test-integration-yelb
+      runAfter:
+        - test-unit-go
+      taskRef:
+        kind: Task
+        name: test-integration-yelb
+      workspaces:
+        - name: workspace
+          workspace: workspace
+    - name: setup-knative
+      params:
+        - name: knativeBinaryLocation
+          value: /tools/bin
+        - name: knativeVersion
+          value: v1.12.0
+        - name: knativeFuncVersion
+          value: v1.12.0
+      taskRef:
+        kind: ClusterTask
+        name: setup-knative
+      workspaces:
+        - name: tools
+          workspace: tools
+    - name: deploy-knative
+      params:
+        - name: knativeDirectory
+          value: /workspace/code/yelb-appserver/go
+      runAfter:
+        - test-integration-yelb
+      taskRef:
+        kind: ClusterTask
+        name: deploy-knative
+      workspaces:
+        - name: images
+          workspace: images
+        - name: workspace
+          workspace: workspace
+        - name: tools
+          workspace: tools
+        - name: secret
+          workspace: secret
+  workspaces:
+    - name: workspace
+    - name: tools
+    - name: images
+    - name: secret
