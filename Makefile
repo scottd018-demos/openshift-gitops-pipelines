@@ -45,7 +45,7 @@ gitops:
 	oc apply -f platform-engineer/gitops.yaml
 
 platform:
-	oc apply -f platform-engineer/platform.yaml
+	oc apply -f platform-engineer/config.yaml
 
 # cleanup tasks
 gitops-cleanup:
