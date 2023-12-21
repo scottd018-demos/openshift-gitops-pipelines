@@ -125,7 +125,7 @@ seed:
 	oc apply -f developer/pipelines/task-seed-db.yaml
 
 pipelines:
-	oc apply -f developer/pipelines/pipelines.yaml
+	oc apply -f developer/pipelines/test-integration-yelb.yaml -f developer/pipelines/pipelines.yaml
 
 app:
 	if [[ ! -d developer/yelb ]]; then git clone https://github.com/scottd018-demos/yelb.git developer/yelb; fi  && \
