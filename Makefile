@@ -117,7 +117,7 @@ secret:
 		--from-literal=YELB_DB_SERVER_PORT=$(YELB_DB_SERVER_PORT) \
 		--from-literal=YELB_DB_NAME=$(YELB_DB_NAME) \
 		--from-literal=YELB_DB_USERNAME=$(YELB_DB_USERNAME) \
-		--from-literal=YELB_DB_PASSWORD=$(YELB_DB_PASSWORD) \
+		--from-literal=YELB_DB_PASSWORD='$(YELB_DB_PASSWORD)' \
 		--from-literal=REDIS_SERVER_ENDPOINT=$(REDIS_SERVER_ENDPOINT) \
 		--from-literal=AWS_REGION=$(AWS_REGION)
 
@@ -140,6 +140,9 @@ app:
 # cleanup tasks
 secret-destroy:
 	oc delete secret $(YELB_SECRET_NAME)
+
+project-destroy:
+	oc delete project yelb
 
 app-destroy:
 	oc delete all -l app=$(YELB_APP_NAME)
