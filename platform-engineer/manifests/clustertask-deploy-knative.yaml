@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: ClusterTask
 metadata:
-  name: build-push-image-knative-go
+  name: deploy-knative
 spec:
   params:
     - name: knativeDirectory
@@ -19,8 +19,20 @@ spec:
         set -e
         export PATH="${PATH}:/tools/bin"
         cd $(params.knativeDirectory)
-        dnf install -y make
         kn func build -v
+    - name: deploy-knative
+      image: registry.access.redhat.com/ubi9/podman:9.1.0-12
+      script: |
+        #!/usr/bin/env bash
+        set -e
+        export PATH="${PATH}:/tools/bin"
+        cd $(params.knativeDirectory)
+        # kn func deploy --build=false -v
+
+        # if we have a secret, use it
+        if [ -d /secret ]; then
+          find /secret -type f
+        fi
   stepTemplate:
     securityContext:
       runAsUser: 0
@@ -28,9 +40,10 @@ spec:
   workspaces:
     - name: images
       mountPath: /var/lib/containers
-    - name: layers
-      mountPath: /layers
     - name: workspace
       mountPath: /workspace
     - name: tools
       mountPath: /tools
+    - name: secret
+      mountPath: /secret
+      optional: true
