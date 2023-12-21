@@ -31,6 +31,9 @@ spec:
         chmod +x $(params.knativeBinaryLocation)/kn
         wget https://github.com/knative/func/releases/download/knative-$(params.knativeFuncVersion)/func_linux_amd64 -O $(params.knativeBinaryLocation)/kn-func
         chmod +x $(params.knativeBinaryLocation)/kn-func
+  stepTemplate:
+    securityContext:
+      runAsGroup: 0
   workspaces:
     - name: workspace
       mountPath: /workspace
