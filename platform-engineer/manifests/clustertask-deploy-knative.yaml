@@ -31,7 +31,12 @@ spec:
 
         # if we have a secret, use it
         if [ -d /secret ]; then
-          find /secret -type f
+          for SECRET in `find /secret -type f`; do
+            KEY=`echo $SECRET | awk -F'/' '${print $NF}`
+            VALUE=`cat $SECRET`
+
+            echo "${KEY}=${VALUE}"
+          done
         fi
   stepTemplate:
     securityContext:
