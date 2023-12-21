@@ -1,0 +1,34 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: build-push-image-knative-go
+spec:
+  params:
+    - name: knativeDirectory
+      type: string
+      default: /workspace/code/demo-app
+      description: |
+        The folder which contains the knative function code and is used to 
+        build the image.
+  steps:
+    - name: build-knative-image
+      image: registry.access.redhat.com/ubi9/podman:9.1.0-12
+      script: |
+        #!/usr/bin/env bash
+        set -e
+        export PATH="${PATH}:/tools/bin"
+        cd $(params.knativeDirectory)
+        dnf install -y make
+        kn func build -v
+  stepTemplate:
+    securityContext:
+      runAsUser: 0
+      privileged: true
+  workspaces:
+    - name: images
+      mountPath: /var/lib/containers
+    - name: workspace
+      mountPath: /workspace
+    - name: tools
+      mountPath: /tools
