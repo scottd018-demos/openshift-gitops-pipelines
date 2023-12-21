@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: yelb-app
-  namespace: default
+  namespace: yelb
 spec:
   tasks:
     - name: setup-git-clone

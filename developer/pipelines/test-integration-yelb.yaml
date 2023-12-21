@@ -3,7 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: test-integration-yelb
-  namespace: default
+  namespace: yelb
 spec:
   steps:
     - name: test-integration-yelb

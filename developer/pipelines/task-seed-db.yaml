@@ -3,7 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
   name: yelb-seed-db
-  namespace: default
+  namespace: yelb
 spec:
   taskSpec:
     steps:
