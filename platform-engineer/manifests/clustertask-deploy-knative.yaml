@@ -43,6 +43,7 @@ spec:
           echo $ENV_STRING
           # kn func deploy $ENV_STRING --build=false -v
         else
+          echo
           # kn func deploy --build=false -v
         fi
   stepTemplate:
