@@ -28,6 +28,8 @@ spec:
   workspaces:
     - name: images
       mountPath: /var/lib/containers
+    - name: layers
+      mountPath: /layers
     - name: workspace
       mountPath: /workspace
     - name: tools
