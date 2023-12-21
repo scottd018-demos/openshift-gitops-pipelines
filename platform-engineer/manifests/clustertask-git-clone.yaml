@@ -25,7 +25,7 @@ spec:
         set -e
 
         # clone if the directory does not exist otherwise pull the latest changes
-        if [ !-d $(params.gitRepoDestination) ]; then
+        if [ ! -d $(params.gitRepoDestination) ]; then
           git clone $(params.gitRepo) $(params.gitRepoDestination)
         else
           cd $(params.gitRepoDestination)

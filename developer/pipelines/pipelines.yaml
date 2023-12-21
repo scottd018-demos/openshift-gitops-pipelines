@@ -221,50 +221,49 @@ spec:
           workspace: workspace
   workspaces:
     - name: workspace
----
-apiVersion: tekton.dev/v1
-kind: Pipeline
-metadata:
-  name: yelb-ui-cd
-  namespace: yelb
-spec:
-  tasks:
-    #
-    # setup
-    #
-    - name: setup-git-clone
-      params:
-        - name: gitRepo
-          value: 'https://github.com/scottd018-demos/yelb.git'
-        - name: gitRepoDestination
-          value: /workspace/code
-      taskRef:
-        kind: ClusterTask
-        name: setup-git-clone
-      workspaces:
-        - name: workspace
-          workspace: workspace
+# ---
+# apiVersion: tekton.dev/v1
+# kind: Pipeline
+# metadata:
+#   name: yelb-ui-cd
+#   namespace: yelb
+# spec:
+#   tasks:
+#     #
+#     # setup
+#     #
+#     - name: setup-git-clone
+#       params:
+#         - name: gitRepo
+#           value: 'https://github.com/scottd018-demos/yelb.git'
+#         - name: gitRepoDestination
+#           value: /workspace/code
+#       taskRef:
+#         kind: ClusterTask
+#         name: setup-git-clone
+#       workspaces:
+#         - name: workspace
+#           workspace: workspace
 
-    #
-    # deploy
-    #
-    - name: deploy-s2i
-      params:
-        - name: knativeDirectory
-          value: /workspace/code/yelb-appserver/go
-      runAfter:
-        - setup-knative
-        - setup-git-clone
-      taskRef:
-        kind: ClusterTask
-        name: deploy-knative
-      workspaces:
-        - name: workspace
-          workspace: workspace
-        - name: tools
-          workspace: tools
-  workspaces:
-    - name: workspace
+#     #
+#     # deploy
+#     #
+#     - name: deploy-s2i
+#       params:
+#         - name: knativeDirectory
+#           value: /workspace/code/yelb-appserver/go
+#       runAfter:
+#         - setup-git-clone
+#       taskRef:
+#         kind: ClusterTask
+#         name: deploy-knative
+#       workspaces:
+#         - name: workspace
+#           workspace: workspace
+#         - name: tools
+#           workspace: tools
+#   workspaces:
+#     - name: workspace
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
