@@ -42,7 +42,7 @@ spec:
     - name: setup-knative
       params:
         - name: knativeBinaryLocation
-          value: /workspace/tools/bin
+          value: /tools/bin
         - name: knativeVersion
           value: v1.12.0
         - name: knativeFuncVersion
@@ -51,8 +51,8 @@ spec:
         kind: ClusterTask
         name: setup-knative
       workspaces:
-        - name: workspace
-          workspace: workspace
+        - name: tools
+          workspace: tools
     - name: deploy-knative
       params:
         - name: knativeDirectory
@@ -65,5 +65,8 @@ spec:
       workspaces:
         - name: workspace
           workspace: workspace
+        - name: tools
+          workspace: tools
   workspaces:
     - name: workspace
+    - name: tools
