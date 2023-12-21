@@ -7,7 +7,7 @@ spec:
   params:
     - name: knativeBinaryLocation
       type: string
-      default: /workspace/bin
+      default: /tools/bin
       description: |
         Location where knative tooling is placed.  Should be located in the path.
     - name: knativeVersion
@@ -35,5 +35,5 @@ spec:
     securityContext:
       runAsGroup: 0
   workspaces:
-    - name: workspace
-      mountPath: /workspace
+    - name: tools
+      mountPath: /tools
