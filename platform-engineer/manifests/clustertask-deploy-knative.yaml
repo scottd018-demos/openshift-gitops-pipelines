@@ -20,7 +20,7 @@ spec:
       script: |
         #!/usr/bin/env bash
         set -e
-        export PATH="${PATH}:/tools/bin"
+        export PATH="${PATH}:/workspace/tools/bin"
         cd $(params.knativeDirectory)
         kn func build -v
     - name: deploy-knative
@@ -28,7 +28,7 @@ spec:
       script: |
         #!/usr/bin/env bash
         set -e
-        export PATH="${PATH}:/tools/bin"
+        export PATH="${PATH}:/workspace/tools/bin"
         cd $(params.knativeDirectory)
         kn func deploy --build=false -v
   stepTemplate:
@@ -38,5 +38,3 @@ spec:
   workspaces:
     - name: workspace
       mountPath: /workspace
-    - name: tools
-      mountPath: /tools
