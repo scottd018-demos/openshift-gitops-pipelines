@@ -5,7 +5,7 @@ metadata:
   name: setup-git-clone
   annotations:
     argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    #argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   params:
     - name: gitRepo
