@@ -5,8 +5,7 @@ metadata:
   name: knative-serving
   namespace: knative-serving
   annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   controller-custom-certs:
     name: ''

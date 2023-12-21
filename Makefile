@@ -41,22 +41,19 @@ infra-destroy:
 #
 
 # deploy tasks
-gitops:
+operators:
 	oc apply -f platform-engineer/gitops.yaml
 
 platform:
 	oc apply -f platform-engineer/config.yaml
 
 # cleanup tasks
-gitops-cleanup:
+operators-cleanup:
 	oc -n openshift-gitops-operator delete subscription openshift-gitops-operator; \
 	oc -n openshift-gitops delete argocd openshift-gitops; \
 	oc delete gitopsservice cluster; \
 	oc -n openshift-gitops-operator delete csv openshift-gitops-operator.v1.11.0; \
 	for CRD in $$(oc get crd | grep argo | awk '{print $$1}'); do oc delete crd $$CRD; done
-
-platform-cleanup:
-	oc delete -f platform-engineer/platform.yaml; \
 	oc delete oc delete mutatingwebhookconfiguration webhook.operator.tekton.dev; \
 	oc delete validatingwebhookconfiguration validation.webhook.operator.tekton.dev namespace.operator.tekton.dev config.webhook.operator.tekton.dev; \
 	oc delete tektonconfig config; \
@@ -65,6 +62,9 @@ platform-cleanup:
 	for CRD in $$(oc get crd | grep tekton | awk '{print $$1}'); do oc delete crd $$CRD; done; \
 	oc delete csv -n openshift-serverless serverless-operator.v1.31.0; \
 	for CRD in $$(oc get crd | grep knative | awk '{print $$1}'); do oc delete crd $$CRD; done
+
+platform-cleanup:
+	oc delete -f platform-engineer/platform.yaml; \
 
 #
 # developer tasks
