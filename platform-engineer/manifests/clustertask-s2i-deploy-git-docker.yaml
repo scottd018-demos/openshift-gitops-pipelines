@@ -30,10 +30,10 @@ spec:
         #!/usr/bin/env bash
         set -e
 
-        # login to the cluster with the existing service account
+        echo "logging into cluster with service account token..."
         oc login --token="`cat /var/run/secrets/kubernetes.io/serviceaccount/token`"
 
-        # set the env string based on inputs
+        echo "setting env string..."
         ENV_STRING=""
         if [ -n "$(params.appEnv)" ]; then
           for PAIR in `echo $(params.appEnv) | tr ',' '\n'`; do
@@ -42,9 +42,11 @@ spec:
 
             ENV_STRING+="--env=$KEY=$VALUE"
           done
+
+          echo "using env string $ENV_STRING"
         fi
 
-        # set the subcommand string based on if we are deploying or building a new version
+        echo "setting subcommand string..."
         SUB_STRING=""
         if [ -z `oc get pods --no-headers -l deployment=$(params.appName) -o name` ]; then
           SUB_STRING="new-app"
@@ -53,6 +55,7 @@ spec:
         fi
 
         # run the command
+        echo "executing 'oc $SUB_STRING' command"
         oc $SUB_STRING $ENV_STRING \
           --name=$(params.appName) \
           --strategy=docker \
