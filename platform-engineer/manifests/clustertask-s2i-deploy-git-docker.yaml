@@ -30,9 +30,6 @@ spec:
         #!/usr/bin/env bash
         set -e
 
-        echo "logging into cluster with service account token..."
-        oc login --token="`cat /var/run/secrets/kubernetes.io/serviceaccount/token`"
-
         echo "setting env string..."
         ENV_STRING=""
         if [ -n "$(params.appEnv)" ]; then
