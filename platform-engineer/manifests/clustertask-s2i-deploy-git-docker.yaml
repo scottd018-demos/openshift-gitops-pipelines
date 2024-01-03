@@ -33,43 +33,38 @@ spec:
         echo "installing git..."
         yum install -y git
 
-        echo "setting env string..."
-        ENV_STRING=""
-        if [ -n "$(params.appEnv)" ]; then
-          for PAIR in `echo $(params.appEnv) | tr ',' '\n'`; do
-            KEY=`echo $PAIR | awk -F'=' '{print $1}'`
-            VALUE=`echo $PAIR | awk -F'=' '{print $NF}'`
-
-            ENV_STRING+="--env=$KEY=$VALUE "
-          done
-
-          echo "using env string $ENV_STRING"
-        fi
-
         echo "setting subcommand string..."
         SUB_STRING=""
         if [ -z `oc get pods --no-headers -l deployment=$(params.appName) -o name` ]; then
-          echo "creating service account '$(params.appName)' for app '$(params.appName)'"
-          oc create sa $(params.appName)
+          echo "deploying app for first time '$(params.appName)'..."
 
-          SUB_STRING="new-app"
-        else
-          SUB_STRING="new-build"
-        fi
+          ENV_STRING=""
+          if [ -n "$(params.appEnv)" ]; then
+            echo "setting env string..."
+            for PAIR in `echo $(params.appEnv) | tr ',' '\n'`; do
+              KEY=`echo $PAIR | awk -F'=' '{print $1}'`
+              VALUE=`echo $PAIR | awk -F'=' '{print $NF}'`
 
-        echo "executing 'oc $SUB_STRING' command..."
-        oc $SUB_STRING $ENV_STRING \
-          --name=$(params.appName) \
-          --strategy=docker \
-          --context-dir=$(params.gitAppDir) \
-          $(params.gitRepo)
+              ENV_STRING+="--env=$KEY=$VALUE "
+            done
 
-        if [ "$SUB_STRING" == "new-app" ]; then
+            echo "using env string $ENV_STRING"
+          fi
+
+          oc new-app $ENV_STRING \
+            --name=$(params.appName) \
+            --strategy=docker \
+            --context-dir=$(params.gitAppDir) \
+            $(params.gitRepo)
+
           echo "update service account '$(params.appName)' for app '$(params.appName)'"
           oc set serviceaccount deployment $(params.appName) $(params.appName)
 
           echo "exposing app '$(params.appName)'..."
           oc expose svc/$(params.appName)
+        else
+          echo "deploying new revision of app '$(params.appName)'..."
+          oc start-build $(params.appName)
         fi
   stepTemplate:
     securityContext:
