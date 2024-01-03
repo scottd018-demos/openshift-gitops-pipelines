@@ -40,7 +40,7 @@ spec:
             KEY=`echo $PAIR | awk -F'=' '{print $1}'`
             VALUE=`echo $PAIR | awk -F'=' '{print $NF}'`
 
-            ENV_STRING+="--env=$KEY=$VALUE"
+            ENV_STRING+="--env=$KEY=$VALUE "
           done
 
           echo "using env string $ENV_STRING"
