@@ -51,7 +51,7 @@ spec:
             echo "using env string $ENV_STRING"
           fi
 
-          echo "creating service account '$(params.appName)'"
+          echo "creating service account '$(params.appName)'..."
           oc create serviceaccount $(params.appName)
 
           echo "deploying app '$(params.appName)'"
@@ -61,7 +61,7 @@ spec:
             --context-dir=$(params.gitAppDir) \
             $(params.gitRepo)
 
-          echo "update service account '$(params.appName)' for app '$(params.appName)'"
+          echo "update service account '$(params.appName)' for app '$(params.appName)'..."
           oc set serviceaccount deployment $(params.appName) $(params.appName)
 
           echo "exposing app '$(params.appName)'..."
