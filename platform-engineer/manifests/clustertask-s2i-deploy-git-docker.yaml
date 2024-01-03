@@ -49,6 +49,9 @@ spec:
         echo "setting subcommand string..."
         SUB_STRING=""
         if [ -z `oc get pods --no-headers -l deployment=$(params.appName) -o name` ]; then
+          echo "creating service account '$(params.appName)' for app '$(params.appName)'"
+          oc create sa $(params.appName)
+
           SUB_STRING="new-app"
         else
           SUB_STRING="new-build"
@@ -62,6 +65,9 @@ spec:
           $(params.gitRepo)
 
         if [ "$SUB_STRING" == "new-app" ]; then
+          echo "update service account '$(params.appName)' for app '$(params.appName)'"
+          oc set serviceaccount deployment $(params.appName) $(params.appName)
+
           echo "exposing app '$(params.appName)'..."
           oc expose svc/$(params.appName)
         fi
