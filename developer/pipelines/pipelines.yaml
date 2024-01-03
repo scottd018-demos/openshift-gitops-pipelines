@@ -221,29 +221,59 @@ spec:
           workspace: workspace
   workspaces:
     - name: workspace
-# ---
-# apiVersion: tekton.dev/v1
-# kind: Pipeline
-# metadata:
-#   name: yelb-ui-cd
-#   namespace: yelb
-# spec:
-#   tasks:
-#     #
-#     # setup
-#     #
-#     - name: setup-git-clone
-#       params:
-#         - name: gitRepo
-#           value: 'https://github.com/scottd018-demos/yelb.git'
-#         - name: gitRepoDestination
-#           value: /workspace/code
-#       taskRef:
-#         kind: ClusterTask
-#         name: setup-git-clone
-#       workspaces:
-#         - name: workspace
-#           workspace: workspace
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: yelb-ui-ci
+  namespace: yelb
+spec:
+  params:
+    - name: gitRepo
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: yelb-ui-ci-
+        namespace: yelb
+      spec:
+        pipelineRef:
+          name: yelb-ui-ci
+        params:
+          - name: gitRepo
+            value: "$(tt.params.gitRepo)"
+        workspaces:
+          - name: workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 100Mi
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: yelb-ui-cd
+  namespace: yelb
+spec:
+  tasks:
+    #
+    # setup
+    #
+    - name: setup-git-clone
+      params:
+        - name: gitRepo
+          value: 'https://github.com/scottd018-demos/yelb.git'
+        - name: gitRepoDestination
+          value: /workspace/code
+      taskRef:
+        kind: ClusterTask
+        name: setup-git-clone
+      workspaces:
+        - name: workspace
+          workspace: workspace
 
 #     #
 #     # deploy
@@ -262,8 +292,38 @@ spec:
 #           workspace: workspace
 #         - name: tools
 #           workspace: tools
-#   workspaces:
-#     - name: workspace
+  workspaces:
+    - name: workspace
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: yelb-ui-cd
+  namespace: yelb
+spec:
+  params:
+    - name: gitRepo
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: yelb-ui-cd-
+        namespace: yelb
+      spec:
+        pipelineRef:
+          name: yelb-ui-cd
+        params:
+          - name: gitRepo
+            value: "$(tt.params.gitRepo)"
+        workspaces:
+          - name: workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 100Mi
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -283,34 +343,82 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
-    - name: yelb-ci
+    - name: yelb-app-ci
       interceptors:
+        - ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              value: "header.match('X-GitHub-Event', 'push')"
         - ref:
             name: github
             kind: ClusterInterceptor
             apiVersion: triggers.tekton.dev/v1alpha1
-          params:
-            - name: eventTypes
-              value:
-                - push
+          # params:
+          #   - name: eventTypes
+          #     value:
+          #       - push
       bindings:
         - ref: github
       template:
         ref: yelb-app-ci
-    - name: yelb-cd
+    - name: yelb-app-cd
       interceptors:
+        - ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              value: "header.match('X-GitHub-Event', 'create')"
         - ref:
             name: github
             kind: ClusterInterceptor
             apiVersion: triggers.tekton.dev/v1alpha1
-          params:
-            - name: eventTypes
-              value:
-                - release
+          # params:
+          #   - name: eventTypes
+          #     value:
+          #       - release
       bindings:
         - ref: github
       template:
         ref: yelb-app-cd
+    - name: yelb-ui-ci
+      interceptors:
+        - ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              value: "header.match('X-GitHub-Event', 'push')"
+        - ref:
+            name: github
+            kind: ClusterInterceptor
+            apiVersion: triggers.tekton.dev/v1alpha1
+          # params:
+          #   - name: eventTypes
+          #     value:
+          #       - push
+      bindings:
+        - ref: github
+      template:
+        ref: yelb-ui-ci
+    - name: yelb-ui-cd
+      interceptors:
+        - ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              value: "header.match('X-GitHub-Event', 'create')"
+        - ref:
+            name: github
+            kind: ClusterInterceptor
+            apiVersion: triggers.tekton.dev/v1alpha1
+          # params:
+          #   - name: eventTypes
+          #     value:
+          #       - release
+      bindings:
+        - ref: github
+      template:
+        ref: yelb-ui-cd
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
