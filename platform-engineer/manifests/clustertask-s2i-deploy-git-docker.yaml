@@ -64,7 +64,7 @@ spec:
           oc expose svc/$(params.appName)
         else
           echo "deploying new revision of app '$(params.appName)'..."
-          oc start-build $(params.appName)
+          oc start-build $(params.appName) -w
         fi
   stepTemplate:
     securityContext:
