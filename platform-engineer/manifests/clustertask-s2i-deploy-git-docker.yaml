@@ -30,6 +30,9 @@ spec:
         #!/usr/bin/env bash
         set -e
 
+        echo "installing git..."
+        yum install -y git
+
         echo "setting env string..."
         ENV_STRING=""
         if [ -n "$(params.appEnv)" ]; then
@@ -52,7 +55,7 @@ spec:
         fi
 
         # run the command
-        echo "executing 'oc $SUB_STRING' command"
+        echo "executing 'oc $SUB_STRING' command..."
         oc $SUB_STRING $ENV_STRING \
           --name=$(params.appName) \
           --strategy=docker \
