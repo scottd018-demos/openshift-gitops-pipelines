@@ -51,38 +51,19 @@ resource "aws_elasticache_parameter_group" "yelb" {
   }
 }
 
-resource "aws_elasticache_user" "yelb_default" {
-  # we must have a default user, so we create it with zero permissions
-  user_id       = "${var.db_cluster_name}-def"
-  user_name     = "default"
-  access_string = "on ~* -@all"
-  engine        = "REDIS"
-  passwords     = [random_string.backend_password.result]
-
-  lifecycle {
-    ignore_changes        = [passwords]
-    create_before_destroy = true
-  }
-}
-
 resource "aws_elasticache_user" "yelb" {
   user_id       = var.db_cluster_name
-  user_name     = var.db_username
+  user_name     = "default"
   access_string = "on ~* +@all"
   engine        = "REDIS"
   passwords     = [random_string.backend_password.result]
-
-  lifecycle {
-    ignore_changes        = [passwords]
-    create_before_destroy = true
-  }
 }
 
 resource "aws_elasticache_user_group" "yelb" {
   engine = "REDIS"
 
   user_group_id = local.redis_group_nane
-  user_ids      = [aws_elasticache_user.yelb.user_id, aws_elasticache_user.yelb_default.user_id]
+  user_ids      = [aws_elasticache_user.yelb.user_id]
 }
 
 resource "aws_elasticache_replication_group" "yelb" {
@@ -110,8 +91,4 @@ resource "aws_elasticache_replication_group" "yelb" {
   at_rest_encryption_enabled = false
   transit_encryption_enabled = true
   user_group_ids             = [aws_elasticache_user_group.yelb.id]
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }

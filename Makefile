@@ -13,6 +13,7 @@ YELB_DB_NAME ?= $(shell cat infrastructure/deploy/terraform.tfstate | jq -r '.re
 YELB_DB_USERNAME ?= $(shell cat infrastructure/deploy/terraform.tfstate | jq -r '.resources[] | select(.type == "aws_rds_cluster" and .name == "yelb") | .instances[0].attributes.master_username')
 YELB_DB_PASSWORD ?= $(shell cat infrastructure/deploy/terraform.tfstate | jq -r '.resources[] | select(.type == "aws_rds_cluster" and .name == "yelb") | .instances[0].attributes.master_password')
 REDIS_SERVER_ENDPOINT ?= $(shell cat infrastructure/deploy/terraform.tfstate | jq -r '.resources[] | select(.type == "aws_elasticache_replication_group" and .name == "yelb") | .instances[0].attributes.configuration_endpoint_address')
+REDIS_PASSWORD ?= $(shell cat infrastructure/deploy/terraform.tfstate | jq -r '.resources[] | select(.type == "aws_elasticache_user" and .name == "yelb") | .instances[0].attributes.passwords[0]')
 AWS_REGION ?= $(shell rosa describe cluster -c $(ROSA_CLUSTER_NAME) -o json | jq -r '.region.id')
 
 #
@@ -42,7 +43,7 @@ infra-destroy:
 
 # deploy tasks
 operators:
-	oc apply -f platform-engineer/gitops.yaml
+	oc apply -f platform-engineer/operators.yaml
 
 platform:
 	oc apply -f platform-engineer/config.yaml
@@ -64,7 +65,7 @@ operators-cleanup:
 	for CRD in $$(oc get crd | grep knative | awk '{print $$1}'); do oc delete crd $$CRD; done
 
 platform-cleanup:
-	oc delete -f platform-engineer/platform.yaml; \
+	oc delete -f platform-engineer/platform.yaml
 
 #
 # developer tasks
@@ -119,6 +120,8 @@ secret:
 		--from-literal=YELB_DB_USERNAME=$(YELB_DB_USERNAME) \
 		--from-literal=YELB_DB_PASSWORD='$(YELB_DB_PASSWORD)' \
 		--from-literal=REDIS_SERVER_ENDPOINT=$(REDIS_SERVER_ENDPOINT) \
+		--from-literal=REDIS_PASSWORD='$(REDIS_PASSWORD)' \
+		--from-literal=REDIS_TLS=true \
 		--from-literal=AWS_REGION=$(AWS_REGION)
 
 seed:
@@ -137,6 +140,18 @@ app:
 		--git-dir=yelb-appserver/go \
 		--git-branch main
 
+ui:
+	oc create sa $(YELB_UI_NAME); \
+	oc new-app \
+		--name=$(YELB_UI_NAME) \
+		--strategy=docker \
+		--context-dir=yelb-ui \
+		--env=YELB_APPSERVER_ENDPOINT=http://$(YELB_APP_NAME).yelb.svc.cluster.local \
+		--env=HACK_PATH=true \
+		https://github.com/scottd018-demos/yelb.git; \
+	oc set serviceaccount deployment $(YELB_UI_NAME) $(YELB_UI_NAME); \
+	oc expose svc $(YELB_UI_NAME)
+
 # cleanup tasks
 secret-destroy:
 	oc delete secret $(YELB_SECRET_NAME)
@@ -147,10 +162,6 @@ project-destroy:
 app-destroy:
 	oc delete all -l app=$(YELB_APP_NAME)
 
-deploy-ui:
-	oc new-app \
-		--name $(YELB_UI_NAME) \
-		--strategy=docker \
-		https://github.com/scottd018-demos/yelb.git \
-		--context-dir yelb-appserver && \
-	oc set env --from=secret/$(YELB_SECRET_NAME) deployment/$(YELB_APP_NAME)
+ui-destroy:
+	oc delete all -l app=$(YELB_UI_NAME); \
+		oc delete sa $(YELB_UI_NAME)

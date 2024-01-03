@@ -81,7 +81,7 @@ spec:
         namespace: yelb
       spec:
         pipelineRef:
-          name: yelp-app-ci
+          name: yelb-app-ci
         params:
           - name: gitRepo
             value: "$(tt.params.gitRepo)"
@@ -175,7 +175,7 @@ spec:
         namespace: yelb
       spec:
         pipelineRef:
-          name: yelp-app-cd
+          name: yelb-app-cd
         params:
           - name: gitRepo
             value: "$(tt.params.gitRepo)"
@@ -283,7 +283,7 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
-    - name: github
+    - name: yelb-ci
       interceptors:
         - ref:
             name: github
@@ -296,8 +296,8 @@ spec:
       bindings:
         - ref: github
       template:
-        ref: yelp-app-ci
-    - name: github
+        ref: yelb-app-ci
+    - name: yelb-cd
       interceptors:
         - ref:
             name: github
@@ -310,7 +310,7 @@ spec:
       bindings:
         - ref: github
       template:
-        ref: yelp-app-cd
+        ref: yelb-app-cd
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
