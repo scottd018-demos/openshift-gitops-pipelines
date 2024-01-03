@@ -51,6 +51,10 @@ spec:
             echo "using env string $ENV_STRING"
           fi
 
+          echo "creating service account '$(params.appName)'"
+          oc create serviceaccount $(params.appName)
+
+          echo "deploying app '$(params.appName)'"
           oc new-app $ENV_STRING \
             --name=$(params.appName) \
             --strategy=docker \
