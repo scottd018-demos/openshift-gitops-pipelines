@@ -258,42 +258,28 @@ metadata:
   name: yelb-ui-cd
   namespace: yelb
 spec:
+  params:
+    - name: gitRepo
+      type: string
+      description: |
+        Git repo containing the yelb go function.
   tasks:
     #
-    # setup
+    # deploy
     #
-    - name: setup-git-clone
+    - name: deploy-s2i
       params:
         - name: gitRepo
-          value: 'https://github.com/scottd018-demos/yelb.git'
-        - name: gitRepoDestination
-          value: /workspace/code
+          value: "$(params.gitRepo)"
+        - name: gitAppDir
+          value: yelb-ui
+        - name: appName
+          value: yelb-ui
+        - name: appEnv
+          value: "HACK_PATH=true,YELB_APPSERVER_ENDPOINT=http://yelb-app.yelb.svc.cluster.local"
       taskRef:
         kind: ClusterTask
-        name: setup-git-clone
-      workspaces:
-        - name: workspace
-          workspace: workspace
-
-#     #
-#     # deploy
-#     #
-#     - name: deploy-s2i
-#       params:
-#         - name: knativeDirectory
-#           value: /workspace/code/yelb-appserver/go
-#       runAfter:
-#         - setup-git-clone
-#       taskRef:
-#         kind: ClusterTask
-#         name: deploy-knative
-#       workspaces:
-#         - name: workspace
-#           workspace: workspace
-#         - name: tools
-#           workspace: tools
-  workspaces:
-    - name: workspace
+        name: s2i-deploy-git-docker
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
@@ -315,15 +301,6 @@ spec:
         params:
           - name: gitRepo
             value: "$(tt.params.gitRepo)"
-        workspaces:
-          - name: workspace
-            volumeClaimTemplate:
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 100Mi
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -343,6 +320,9 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
+    #
+    # yelb-app triggers
+    #
     - name: yelb-app-ci
       interceptors:
         - ref:
@@ -354,10 +334,6 @@ spec:
             name: github
             kind: ClusterInterceptor
             apiVersion: triggers.tekton.dev/v1alpha1
-          # params:
-          #   - name: eventTypes
-          #     value:
-          #       - push
       bindings:
         - ref: github
       template:
@@ -373,14 +349,14 @@ spec:
             name: github
             kind: ClusterInterceptor
             apiVersion: triggers.tekton.dev/v1alpha1
-          # params:
-          #   - name: eventTypes
-          #     value:
-          #       - release
       bindings:
         - ref: github
       template:
         ref: yelb-app-cd
+    
+    #
+    # yelb-ui-triggers
+    #
     - name: yelb-ui-ci
       interceptors:
         - ref:
@@ -392,10 +368,6 @@ spec:
             name: github
             kind: ClusterInterceptor
             apiVersion: triggers.tekton.dev/v1alpha1
-          # params:
-          #   - name: eventTypes
-          #     value:
-          #       - push
       bindings:
         - ref: github
       template:
@@ -411,10 +383,6 @@ spec:
             name: github
             kind: ClusterInterceptor
             apiVersion: triggers.tekton.dev/v1alpha1
-          # params:
-          #   - name: eventTypes
-          #     value:
-          #       - release
       bindings:
         - ref: github
       template:

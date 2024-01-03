@@ -54,13 +54,17 @@ spec:
           SUB_STRING="new-build"
         fi
 
-        # run the command
         echo "executing 'oc $SUB_STRING' command..."
         oc $SUB_STRING $ENV_STRING \
           --name=$(params.appName) \
           --strategy=docker \
           --context-dir=$(params.gitAppDir) \
           $(params.gitRepo)
+
+        if [ "$SUB_STRING" == "new-app" ]; then
+          echo "exposing app '$(params.appName)'..."
+          oc expose svc/$(params.appName)
+        fi
   stepTemplate:
     securityContext:
       runAsGroup: 0

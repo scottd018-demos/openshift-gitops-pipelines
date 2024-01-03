@@ -159,6 +159,9 @@ secret-destroy:
 project-destroy:
 	oc delete project yelb
 
+pipelines-destroy:
+	oc delete -f developer/pipelines/test-integration-yelb.yaml -f developer/pipelines/pipelines.yaml
+
 app-destroy:
 	oc delete all -l app=$(YELB_APP_NAME)
 
